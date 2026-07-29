@@ -1,0 +1,27 @@
+# Virtual environments
+EdosEnv/
+venv/
+.venv/
+
+# Python
+__pycache__/
+*.py[cod]
+
+# VS Code
+.vscode/
+
+# macOS / Windows
+.DS_Store
+Thumbs.db
+
+# PDF bank statements
+Estados de cuenta/
+*.pdf
+
+# Generated CSV files
+csv_output/
+csv_output_tdc/
+
+# Temporary files
+tmp/
+*.log
