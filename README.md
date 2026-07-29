@@ -1,164 +1,134 @@
-# Analytics Balance Creator
+# Extracción de estados de cuenta BBVA
 
-BBVA Bank Statement Extractor
+Este proyecto contiene scripts en Python para extraer movimientos desde estados de cuenta BBVA en PDF y consolidarlos en archivos CSV.
 
-This project extracts transaction data from BBVA bank statement PDFs and converts them into structured CSV files for further financial analysis.
+## Estado actual
 
-## Current Status
+Actualmente, el flujo funcional es el de **cuenta de débito**. Los scripts relacionados con tarjeta de crédito (`TDC`) siguen en desarrollo y no forman parte del flujo estable.
 
-✅ **Debit account extraction is fully functional.**
+## Funcionalidad disponible
 
-⚠️ **Credit card (TDC) extraction is still under development and should not be considered stable.**
+El flujo de débito permite:
 
----
+- Leer estados de cuenta BBVA en PDF.
+- Extraer movimientos de la sección `DETALLE DE MOVIMIENTOS REALIZADOS`.
+- Separar cargos y abonos.
+- Normalizar fechas y descripciones.
+- Generar un CSV por cada PDF.
+- Combinar todos los CSV en un archivo consolidado.
 
-# Features
+## Requisitos
 
-The current implementation supports:
+- Python 3.10 o superior.
+- `pip`.
+- Estados de cuenta BBVA descargados en PDF.
 
-- Extracting debit account transactions from BBVA PDF statements.
-- Parsing transaction dates, descriptions, charges, and deposits.
-- Generating one CSV per PDF.
-- Merging all extracted transactions into a single consolidated CSV.
-- Exporting data using a pipe (`|`) separator.
+Dependencias:
 
----
+```text
+pandas
+PyMuPDF
+```
 
-# Requirements
-
-- Python 3.10+
-- pip
-
-Required packages:
+## Instalación
 
 ```bash
+git clone <URL_DEL_REPOSITORIO>
+cd <NOMBRE_DEL_REPOSITORIO>
+```
+
+### Windows
+
+```powershell
+python -m venv EdosEnv
+EdosEnv\Scripts\activate
 pip install pandas pymupdf
 ```
 
----
+### macOS o Linux
 
-# Project Structure
-
+```bash
+python3 -m venv EdosEnv
+source EdosEnv/bin/activate
+pip install pandas pymupdf
 ```
+
+## Estructura esperada
+
+```text
 .
 ├── Estados de cuenta/
-│   ├── January 2025.pdf
-│   ├── February 2025.pdf
-│   └── ...
-│
+│   ├── Enero 2025.pdf
+│   ├── Febrero 2025.pdf
+│   └── Marzo 2025.pdf
 ├── csv_output/
-│
 ├── extract_bbva_debito.py
 ├── procesar_estados.py
 ├── debug_pdf_text.py
-│
-├── extract_bbva_tdc_*.py        # Work in progress
-├── procesar_tdc.py              # Work in progress
-├── limpiar_tdc.py               # Work in progress
-│
 └── README.md
 ```
 
-The `csv_output` folder will be created automatically if it does not exist.
+La carpeta `csv_output` se crea automáticamente.
 
----
+## Preparación de los PDF
 
-# Preparing the PDF Statements
+1. Descarga desde BBVA los estados de cuenta de débito que quieras analizar.
+2. Guarda los PDF en `Estados de cuenta/`.
+3. Asegúrate de que el nombre de cada archivo incluya el año, por ejemplo:
 
-1. Download your BBVA **debit account** statements in PDF format.
-
-2. Place all PDFs inside:
-
-```
-Estados de cuenta/
-```
-
-3. Make sure each file name contains the year.
-
-Examples:
-
-```
-January 2025.pdf
-February 2025.pdf
-March 2025.pdf
+```text
+Enero 2025.pdf
+Febrero 2025.pdf
+Marzo 2025.pdf
 ```
 
-The extractor uses the year found in the filename to reconstruct complete transaction dates.
+El extractor usa el año del nombre para reconstruir las fechas de los movimientos. No mezcles por ahora estados de cuenta de tarjeta de crédito en esta carpeta.
 
----
+## Ejecución
 
-# Running the Project
+### 1. Revisar un PDF de forma opcional
 
-## 1. Inspect a PDF (optional)
-
-If you want to verify that the PDF contains selectable text:
-
-```bash
-python debug_pdf_text.py "Estados de cuenta/January 2025.pdf"
+```powershell
+python debug_pdf_text.py "Estados de cuenta/Enero 2025.pdf"
 ```
 
-The extractor expects the section:
+Esto permite comprobar que el PDF contiene texto seleccionable y que aparece la sección:
 
-```
+```text
 DETALLE DE MOVIMIENTOS REALIZADOS
 ```
 
-to be present in the document.
+### 2. Probar un solo estado de cuenta
 
----
-
-## 2. Extract a Single Statement
-
-```bash
-python extract_bbva_debito.py \
-    --input "Estados de cuenta/January 2025.pdf" \
-    --output "csv_output/January 2025.csv"
+```powershell
+python extract_bbva_debito.py --input "Estados de cuenta/Enero 2025.pdf" --output "csv_output/Enero 2025.csv"
 ```
 
-If you want to inspect the detected tokens:
+Para guardar también los tokens detectados:
 
-```bash
-python extract_bbva_debito.py \
-    --input "Estados de cuenta/January 2025.pdf" \
-    --output "csv_output/January 2025.csv" \
-    --debug-tokens
+```powershell
+python extract_bbva_debito.py --input "Estados de cuenta/Enero 2025.pdf" --output "csv_output/Enero 2025.csv" --debug-tokens
 ```
 
-This generates:
+### 3. Procesar todos los estados de cuenta
 
-```
-csv_output/January 2025_debug_tokens.txt
-```
-
-which can be useful for debugging extraction issues.
-
----
-
-## 3. Process All Statements
-
-```bash
+```powershell
 python procesar_estados.py
 ```
 
-The script will:
+Este script:
 
-1. Scan the `Estados de cuenta/` directory.
-2. Extract each PDF individually.
-3. Generate one CSV per statement.
-4. Merge every CSV into a single dataset.
-5. Export:
+1. Busca todos los PDF en `Estados de cuenta/`.
+2. Ejecuta `extract_bbva_debito.py` para cada archivo.
+3. Guarda un CSV por PDF en `csv_output/`.
+4. Combina los resultados.
+5. Genera `csv_output/movimientos_debito_total.csv`.
 
-```
-csv_output/movimientos_debito_total.csv
-```
+## Formato de salida
 
----
+El CSV consolidado utiliza `|` como separador y contiene:
 
-# Output Format
-
-The consolidated CSV contains:
-
-```
+```text
 fecha_oper
 fecha_liq
 descripcion
@@ -168,79 +138,53 @@ pagina
 archivo_origen
 ```
 
-Example:
+Ejemplo:
 
-```
+```text
 fecha_oper|fecha_liq|descripcion|cargo|abono|pagina|archivo_origen
-2025-01-03|2025-01-03|Payroll Deposit||17821.00|2|January 2025
-2025-01-05|2025-01-06|Grocery Store|350.00||3|January 2025
+2025-01-03|2025-01-03|PAGO DE NOMINA||17821.00|2|Enero 2025
+2025-01-05|2025-01-06|COMPRA COMERCIO|350.00||3|Enero 2025
 ```
 
----
+## Orden recomendado
 
-# Recommended Workflow
-
-```
-1. Download BBVA debit statements.
-2. Place them inside "Estados de cuenta/".
-3. Verify that filenames include the year.
-4. (Optional) Run debug_pdf_text.py.
-5. Test one PDF with extract_bbva_debito.py.
-6. Run procesar_estados.py.
-7. Analyze csv_output/movimientos_debito_total.csv.
+```text
+1. Descargar los PDF.
+2. Colocarlos en Estados de cuenta/.
+3. Verificar que el nombre incluya el año.
+4. Ejecutar debug_pdf_text.py si es necesario.
+5. Probar extract_bbva_debito.py con un archivo.
+6. Ejecutar procesar_estados.py.
+7. Analizar csv_output/movimientos_debito_total.csv.
 ```
 
----
+## Solución de problemas
 
-# Troubleshooting
+### No se puede inferir el año
 
-## No year detected
+El nombre debe incluir un año de cuatro dígitos, por ejemplo `Enero 2025.pdf`.
 
-The filename must contain a four-digit year.
+### No se extrajeron movimientos
 
-Correct:
+Ejecuta el extractor con `--debug-tokens` y revisa el archivo generado. También puedes inspeccionar el texto con:
 
-```
-January 2025.pdf
-```
-
-Incorrect:
-
-```
-January.pdf
+```powershell
+python debug_pdf_text.py "Estados de cuenta/Archivo.pdf"
 ```
 
----
+### El PDF no contiene texto seleccionable
 
-## No transactions extracted
+El extractor usa PyMuPDF y espera texto embebido. Si el documento es una imagen escaneada, será necesario añadir OCR.
 
-Run:
+### El CSV está vacío o incompleto
 
-```bash
-python extract_bbva_debito.py --debug-tokens
-```
+Revisa que el PDF contenga `DETALLE DE MOVIMIENTOS REALIZADOS` y fechas con un formato similar a `22/ENE`.
 
-or inspect the PDF using:
+## Scripts de tarjeta de crédito
 
-```bash
-python debug_pdf_text.py "Estados de cuenta/statement.pdf"
-```
+Los siguientes archivos corresponden a pruebas de extracción de TDC y todavía no forman parte del flujo estable:
 
----
-
-## PDF contains scanned images
-
-The current extractor expects machine-readable PDFs.
-
-Scanned documents require an OCR step before extraction.
-
----
-
-# Credit Card (TDC)
-
-The following scripts are experimental and are **not part of the stable workflow**:
-
-```
+```text
 extract_bbva_tdc_desglose.py
 extract_bbva_tdc_movimientos.py
 extract_bbva_tdc_regulares.py
@@ -249,43 +193,26 @@ procesar_tdc.py
 limpiar_tdc.py
 ```
 
-These scripts are still being developed and should not be used for financial reconciliation.
+Pueden conservarse como trabajo en progreso, pero no se recomienda usarlos para resultados financieros definitivos.
 
----
-
-# Recommended .gitignore
+## `.gitignore` recomendado
 
 ```gitignore
-# Virtual environments
 EdosEnv/
-venv/
 .venv/
-
-# Python
+venv/
 __pycache__/
 *.pyc
-
-# Personal bank statements
 Estados de cuenta/
-
-# Generated CSV files
 csv_output/
 csv_output_tdc/
 tmp/
-
-# Operating system
 .DS_Store
 Thumbs.db
 ```
 
-This prevents accidentally committing personal financial information.
+Esto evita subir accidentalmente estados de cuenta, CSV generados o información financiera sensible.
 
----
+## Aviso
 
-# Disclaimer
-
-This project processes personal financial data.
-
-Always verify the generated CSV files before using them for financial analysis, budgeting, or accounting.
-
-Do **not** commit bank statements or generated transaction files to public repositories.
+Este proyecto procesa información financiera personal. Revisa los resultados antes de utilizarlos para análisis contables o financieros y evita subir al repositorio estados de cuenta o archivos CSV generados.
