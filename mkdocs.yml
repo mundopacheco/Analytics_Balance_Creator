@@ -1,0 +1,35 @@
+site_name: Analytics Balance Creator
+site_description: Extraction, validation and analysis of BBVA account statements
+site_author: Analytics Balance Creator
+
+docs_dir: docs
+
+nav:
+  - Home: index.md
+
+  - Getting Started: getting-started.md
+
+  - Data Extraction:
+      - Debit Extractor: debit-extractor.md
+      - Output Files: output-files.md
+      - Validation: validation.md
+
+  - Analysis:
+      - Colab Analysis: colab-analysis.md
+      - Transaction Classification: transaction-classification.md
+      - Monthly Budget: monthly-budget.md
+
+  - Help:
+      - Troubleshooting: troubleshooting.md
+
+  - Development:
+      - TDC Development: tdc-development.md
+
+theme:
+  name: mkdocs
+
+markdown_extensions:
+  - tables
+  - fenced_code
+  - toc:
+      permalink: true
