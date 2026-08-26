@@ -10,11 +10,61 @@ import pandas as pd
 # ============================================================
 
 BASE_DIR = Path(__file__).resolve().parent
-INPUT_DIR = BASE_DIR / "Estados de cuenta"
-OUTPUT_DIR = BASE_DIR / "csv_output"
-EXTRACTOR = BASE_DIR / "extract_bbva_debito.py"
 
-OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+INPUT_DIR = (
+    BASE_DIR
+    / "Estados de cuenta"
+)
+
+OUTPUT_DIR = (
+    BASE_DIR
+    / "csv_output"
+)
+
+SALDOS_DIR = (
+    OUTPUT_DIR
+    / "saldos"
+)
+
+RESUMENES_DIR = (
+    OUTPUT_DIR
+    / "resumenes"
+)
+
+CONSOLIDADOS_DIR = (
+    OUTPUT_DIR
+    / "consolidados"
+)
+
+EXTRACTOR = (
+    BASE_DIR
+    / "extract_bbva_debito.py"
+)
+
+
+# ============================================================
+# CREATE OUTPUT DIRECTORIES
+# ============================================================
+
+OUTPUT_DIR.mkdir(
+    parents=True,
+    exist_ok=True
+)
+
+SALDOS_DIR.mkdir(
+    parents=True,
+    exist_ok=True
+)
+
+RESUMENES_DIR.mkdir(
+    parents=True,
+    exist_ok=True
+)
+
+CONSOLIDADOS_DIR.mkdir(
+    parents=True,
+    exist_ok=True
+)
 
 
 # ============================================================
@@ -22,22 +72,33 @@ OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 # ============================================================
 
 if not EXTRACTOR.exists():
+
     raise FileNotFoundError(
-        f"No se encontró el extractor de débito:\n{EXTRACTOR}"
+        "No se encontró el extractor de débito:\n"
+        f"{EXTRACTOR}"
     )
+
 
 if not INPUT_DIR.exists():
+
     raise FileNotFoundError(
-        f"No se encontró la carpeta de estados de cuenta:\n{INPUT_DIR}\n\n"
-        'Crea una carpeta llamada "Estados de cuenta" en la raíz del proyecto '
-        "y coloca ahí tus archivos PDF."
+        "No se encontró la carpeta de estados de cuenta:\n"
+        f"{INPUT_DIR}\n\n"
+        'Crea la carpeta "Estados de cuenta" '
+        "y coloca ahí los PDF."
     )
 
-pdf_files = sorted(INPUT_DIR.glob("*.pdf"))
+
+pdf_files = sorted(
+    INPUT_DIR.glob("*.pdf")
+)
+
 
 if not pdf_files:
+
     raise RuntimeError(
-        f'No se encontraron archivos PDF en:\n{INPUT_DIR}'
+        "No se encontraron archivos PDF en:\n"
+        f"{INPUT_DIR}"
     )
 
 
@@ -45,73 +106,214 @@ if not pdf_files:
 # PROCESS EACH PDF
 # ============================================================
 
-print(f"PDF encontrados: {len(pdf_files)}")
-print(f"Carpeta de entrada: {INPUT_DIR}")
-print(f"Carpeta de salida: {OUTPUT_DIR}\n")
+print(
+    f"PDF encontrados: {len(pdf_files)}"
+)
 
-generated_csvs = []
+print(
+    f"Entrada: {INPUT_DIR}"
+)
+
+print(
+    f"Salida principal: {OUTPUT_DIR}"
+)
+
+print()
+
+
+generated_movimientos = []
+generated_saldos = []
+generated_resumenes = []
+
 
 for pdf_file in pdf_files:
-    output_csv = OUTPUT_DIR / f"{pdf_file.stem}.csv"
+
+    # Individual movement CSV remains directly in csv_output/
+    output_movimientos = (
+        OUTPUT_DIR
+        / f"{pdf_file.stem}.csv"
+    )
+
+    output_saldo = (
+        SALDOS_DIR
+        / f"{pdf_file.stem}_saldo.csv"
+    )
+
+    output_resumen = (
+        RESUMENES_DIR
+        / f"{pdf_file.stem}_resumen.csv"
+    )
 
     print("=" * 70)
-    print(f"Procesando: {pdf_file.name}")
+
+    print(
+        f"Procesando: "
+        f"{pdf_file.name}"
+    )
 
     result = subprocess.run(
         [
             sys.executable,
             str(EXTRACTOR),
+
             "--input",
             str(pdf_file),
+
             "--output",
-            str(output_csv),
+            str(output_movimientos),
+
+            "--saldo-output",
+            str(output_saldo),
+
+            "--resumen-output",
+            str(output_resumen),
         ],
         capture_output=True,
         text=True,
         cwd=str(BASE_DIR),
     )
 
+    # --------------------------------------------------------
+    # Extractor failed
+    # --------------------------------------------------------
+
     if result.returncode != 0:
-        print(f"ERROR al procesar: {pdf_file.name}")
+
+        print(
+            f"ERROR al procesar: "
+            f"{pdf_file.name}"
+        )
 
         if result.stdout.strip():
+
             print("\nSalida:")
-            print(result.stdout.strip())
+            print(
+                result.stdout.strip()
+            )
 
         if result.stderr.strip():
-            print("\nDetalle del error:")
-            print(result.stderr.strip())
+
+            print("\nDetalle:")
+            print(
+                result.stderr.strip()
+            )
 
         continue
 
+    # --------------------------------------------------------
+    # Show extractor output
+    # --------------------------------------------------------
+
     if result.stdout.strip():
-        print(result.stdout.strip())
 
-    if output_csv.exists():
-        generated_csvs.append(output_csv)
+        print(
+            result.stdout.strip()
+        )
+
+    # --------------------------------------------------------
+    # Register generated files
+    # --------------------------------------------------------
+
+    if output_movimientos.exists():
+
+        generated_movimientos.append(
+            output_movimientos
+        )
+
     else:
-        print(f"ADVERTENCIA: no se generó el archivo esperado: {output_csv}")
+
+        print(
+            "ADVERTENCIA: no se generó "
+            f"{output_movimientos}"
+        )
+
+
+    if output_saldo.exists():
+
+        generated_saldos.append(
+            output_saldo
+        )
+
+    else:
+
+        print(
+            "ADVERTENCIA: no se generó "
+            f"{output_saldo}"
+        )
+
+
+    if output_resumen.exists():
+
+        generated_resumenes.append(
+            output_resumen
+        )
+
+    else:
+
+        print(
+            "ADVERTENCIA: no se generó "
+            f"{output_resumen}"
+        )
 
 
 # ============================================================
-# CONSOLIDATE GENERATED CSV FILES
+# HELPER: READ CSV SAFELY
 # ============================================================
 
-print("\n" + "=" * 70)
-print("Generando archivo consolidado...")
+def read_csv_safe(path: Path):
 
-dfs = []
-
-for csv_file in sorted(generated_csvs):
     try:
-        df = pd.read_csv(csv_file, sep="|")
+
+        return pd.read_csv(
+            path,
+            sep="|",
+            encoding="utf-8-sig"
+        )
+
     except Exception as exc:
-        print(f"ADVERTENCIA: no se pudo leer {csv_file.name}: {exc}")
+
+        print(
+            f"ADVERTENCIA: no se pudo leer "
+            f"{path.name}: {exc}"
+        )
+
+        return None
+
+
+# ============================================================
+# CONSOLIDATE MOVEMENTS
+# ============================================================
+
+print()
+print("=" * 70)
+print(
+    "Generando consolidado de movimientos..."
+)
+
+
+movimientos_dfs = []
+
+
+for csv_file in sorted(
+    generated_movimientos
+):
+
+    df = read_csv_safe(
+        csv_file
+    )
+
+    if df is None:
         continue
 
     if df.empty:
-        print(f"ADVERTENCIA: {csv_file.name} está vacío y será omitido.")
+
+        print(
+            f"ADVERTENCIA: "
+            f"{csv_file.name} está vacío."
+        )
+
         continue
+
 
     required_columns = {
         "fecha_oper",
@@ -119,102 +321,456 @@ for csv_file in sorted(generated_csvs):
         "descripcion",
         "cargo",
         "abono",
+        "saldo_operacion",
+        "saldo_liquidacion",
         "pagina",
     }
 
-    missing_columns = required_columns.difference(df.columns)
 
-    if missing_columns:
-        print(
-            f"ADVERTENCIA: {csv_file.name} no tiene las columnas requeridas: "
-            f"{sorted(missing_columns)}"
+    missing = (
+        required_columns
+        .difference(
+            df.columns
         )
+    )
+
+
+    if missing:
+
+        print(
+            f"ADVERTENCIA: "
+            f"{csv_file.name} no contiene "
+            f"{sorted(missing)}"
+        )
+
         continue
 
-    df["archivo_origen"] = csv_file.stem
-    dfs.append(df)
 
+    df["archivo_origen"] = (
+        csv_file.stem
+    )
 
-if not dfs:
-    raise RuntimeError(
-        "No se encontraron CSV válidos para generar el consolidado."
+    movimientos_dfs.append(
+        df
     )
 
 
-# Crear el DataFrame consolidado antes de intentar modificarlo
-df_total = pd.concat(dfs, ignore_index=True)
+if movimientos_dfs:
 
-
-# ============================================================
-# DATA CLEANING
-# ============================================================
-
-df_total["fecha_oper"] = pd.to_datetime(
-    df_total["fecha_oper"],
-    errors="coerce",
-)
-
-df_total["fecha_liq"] = pd.to_datetime(
-    df_total["fecha_liq"],
-    errors="coerce",
-)
-
-df_total["cargo"] = pd.to_numeric(
-    df_total["cargo"],
-    errors="coerce",
-)
-
-df_total["abono"] = pd.to_numeric(
-    df_total["abono"],
-    errors="coerce",
-)
-
-for column in ["descripcion", "archivo_origen"]:
-    df_total[column] = (
-        df_total[column]
-        .astype("string")
-        .str.replace("|", " ", regex=False)
-        .str.replace(r"\s+", " ", regex=True)
-        .str.strip()
+    df_movimientos = pd.concat(
+        movimientos_dfs,
+        ignore_index=True
     )
 
-rows_before = len(df_total)
+    # --------------------------------------------------------
+    # Dates
+    # --------------------------------------------------------
 
-df_total = df_total[
-    df_total["fecha_oper"].notna()
-].copy()
+    for column in [
+        "fecha_oper",
+        "fecha_liq",
+    ]:
 
-removed_rows = rows_before - len(df_total)
+        df_movimientos[column] = pd.to_datetime(
+            df_movimientos[column],
+            errors="coerce"
+        )
 
-if removed_rows:
+    # --------------------------------------------------------
+    # Numeric columns
+    # --------------------------------------------------------
+
+    numeric_columns = [
+        "cargo",
+        "abono",
+        "saldo_operacion",
+        "saldo_liquidacion",
+    ]
+
+
+    for column in numeric_columns:
+
+        df_movimientos[column] = pd.to_numeric(
+            df_movimientos[column],
+            errors="coerce"
+        )
+
+    # --------------------------------------------------------
+    # Text cleanup
+    # --------------------------------------------------------
+
+    for column in [
+        "descripcion",
+        "archivo_origen",
+    ]:
+
+        df_movimientos[column] = (
+            df_movimientos[column]
+            .astype("string")
+            .str.replace(
+                "|",
+                " ",
+                regex=False
+            )
+            .str.replace(
+                r"\s+",
+                " ",
+                regex=True
+            )
+            .str.strip()
+        )
+
+    # --------------------------------------------------------
+    # Remove invalid movement dates
+    # --------------------------------------------------------
+
+    before = len(
+        df_movimientos
+    )
+
+    df_movimientos = (
+        df_movimientos[
+            df_movimientos[
+                "fecha_oper"
+            ].notna()
+        ]
+        .copy()
+    )
+
+    removed = (
+        before
+        - len(df_movimientos)
+    )
+
+
+    if removed:
+
+        print(
+            f"ADVERTENCIA: se eliminaron "
+            f"{removed} movimientos "
+            "sin fecha válida."
+        )
+
+    # --------------------------------------------------------
+    # Sort
+    # --------------------------------------------------------
+
+    df_movimientos = (
+        df_movimientos
+        .sort_values(
+            [
+                "fecha_oper",
+                "fecha_liq",
+                "archivo_origen",
+            ],
+            na_position="last",
+        )
+        .reset_index(
+            drop=True
+        )
+    )
+
+    # --------------------------------------------------------
+    # Format dates back as ISO
+    # --------------------------------------------------------
+
+    df_movimientos[
+        "fecha_oper"
+    ] = (
+        df_movimientos[
+            "fecha_oper"
+        ]
+        .dt.strftime(
+            "%Y-%m-%d"
+        )
+    )
+
+    df_movimientos[
+        "fecha_liq"
+    ] = (
+        df_movimientos[
+            "fecha_liq"
+        ]
+        .dt.strftime(
+            "%Y-%m-%d"
+        )
+    )
+
+    # --------------------------------------------------------
+    # Save
+    # --------------------------------------------------------
+
+    movimientos_total_path = (
+        CONSOLIDADOS_DIR
+        / "movimientos_debito_total.csv"
+    )
+
+    df_movimientos.to_csv(
+        movimientos_total_path,
+        index=False,
+        sep="|",
+        encoding="utf-8-sig",
+    )
+
     print(
-        f"ADVERTENCIA: se eliminaron {removed_rows} filas "
-        "sin una fecha de operación válida."
+        f"Movimientos consolidados: "
+        f"{movimientos_total_path}"
     )
 
-df_total = df_total.sort_values(
-    by=["fecha_oper", "fecha_liq", "archivo_origen"],
-    na_position="last",
-).reset_index(drop=True)
+    print(
+        f"Filas: "
+        f"{len(df_movimientos)}"
+    )
 
-df_total["fecha_oper"] = df_total["fecha_oper"].dt.strftime("%Y-%m-%d")
-df_total["fecha_liq"] = df_total["fecha_liq"].dt.strftime("%Y-%m-%d")
+else:
+
+    print(
+        "ADVERTENCIA: no hay movimientos "
+        "válidos para consolidar."
+    )
 
 
 # ============================================================
-# SAVE CONSOLIDATED FILE
+# CONSOLIDATE BALANCES
 # ============================================================
 
-out_total = OUTPUT_DIR / "movimientos_debito_total.csv"
-
-df_total.to_csv(
-    out_total,
-    index=False,
-    sep="|",
-    encoding="utf-8-sig",
+print()
+print("=" * 70)
+print(
+    "Generando consolidado de saldos..."
 )
 
-print("\nProceso terminado correctamente.")
-print(f"Consolidado generado en: {out_total}")
-print(f"Archivos individuales incluidos: {len(dfs)}")
-print(f"Filas totales: {len(df_total)}")
+
+saldo_dfs = []
+
+
+for csv_file in sorted(
+    generated_saldos
+):
+
+    df = read_csv_safe(
+        csv_file
+    )
+
+    if df is None or df.empty:
+        continue
+
+    saldo_dfs.append(
+        df
+    )
+
+
+if saldo_dfs:
+
+    df_saldos = pd.concat(
+        saldo_dfs,
+        ignore_index=True
+    )
+
+    df_saldos[
+        "fecha_corte"
+    ] = pd.to_datetime(
+        df_saldos["fecha_corte"],
+        errors="coerce"
+    )
+
+    df_saldos = (
+        df_saldos
+        .sort_values(
+            "fecha_corte"
+        )
+        .reset_index(
+            drop=True
+        )
+    )
+
+    df_saldos[
+        "fecha_corte"
+    ] = (
+        df_saldos[
+            "fecha_corte"
+        ]
+        .dt.strftime(
+            "%Y-%m-%d"
+        )
+    )
+
+    saldo_total_path = (
+        CONSOLIDADOS_DIR
+        / "saldos_debito_total.csv"
+    )
+
+    df_saldos.to_csv(
+        saldo_total_path,
+        index=False,
+        sep="|",
+        encoding="utf-8-sig",
+    )
+
+    print(
+        f"Saldos consolidados: "
+        f"{saldo_total_path}"
+    )
+
+else:
+
+    print(
+        "ADVERTENCIA: no hay saldos "
+        "válidos para consolidar."
+    )
+
+
+# ============================================================
+# CONSOLIDATE SUMMARIES
+# ============================================================
+
+print()
+print("=" * 70)
+print(
+    "Generando consolidado de resúmenes..."
+)
+
+
+resumen_dfs = []
+
+
+for csv_file in sorted(
+    generated_resumenes
+):
+
+    df = read_csv_safe(
+        csv_file
+    )
+
+    if df is None or df.empty:
+        continue
+
+    resumen_dfs.append(
+        df
+    )
+
+
+if resumen_dfs:
+
+    df_resumenes = pd.concat(
+        resumen_dfs,
+        ignore_index=True
+    )
+
+    # --------------------------------------------------------
+    # Dates
+    # --------------------------------------------------------
+
+    for column in [
+        "periodo_inicio",
+        "periodo_fin",
+        "fecha_corte",
+    ]:
+
+        if column in df_resumenes.columns:
+
+            df_resumenes[column] = (
+                pd.to_datetime(
+                    df_resumenes[column],
+                    errors="coerce"
+                )
+            )
+
+    # --------------------------------------------------------
+    # Sort by cut date
+    # --------------------------------------------------------
+
+    df_resumenes = (
+        df_resumenes
+        .sort_values(
+            "fecha_corte"
+        )
+        .reset_index(
+            drop=True
+        )
+    )
+
+    # --------------------------------------------------------
+    # ISO date format
+    # --------------------------------------------------------
+
+    for column in [
+        "periodo_inicio",
+        "periodo_fin",
+        "fecha_corte",
+    ]:
+
+        if column in df_resumenes.columns:
+
+            df_resumenes[column] = (
+                df_resumenes[column]
+                .dt.strftime(
+                    "%Y-%m-%d"
+                )
+            )
+
+    # --------------------------------------------------------
+    # Save
+    # --------------------------------------------------------
+
+    resumen_total_path = (
+        CONSOLIDADOS_DIR
+        / "resumenes_debito_total.csv"
+    )
+
+    df_resumenes.to_csv(
+        resumen_total_path,
+        index=False,
+        sep="|",
+        encoding="utf-8-sig",
+    )
+
+    print(
+        f"Resúmenes consolidados: "
+        f"{resumen_total_path}"
+    )
+
+else:
+
+    print(
+        "ADVERTENCIA: no hay resúmenes "
+        "válidos para consolidar."
+    )
+
+
+# ============================================================
+# FINAL REPORT
+# ============================================================
+
+print()
+print("=" * 70)
+print(
+    "PROCESO TERMINADO"
+)
+
+print(
+    f"PDF procesados correctamente: "
+    f"{len(generated_movimientos)} "
+    f"de {len(pdf_files)}"
+)
+
+print()
+print(
+    f"CSV individuales: "
+    f"{OUTPUT_DIR}"
+)
+
+print(
+    f"Saldos: "
+    f"{SALDOS_DIR}"
+)
+
+print(
+    f"Resúmenes: "
+    f"{RESUMENES_DIR}"
+)
+
+print(
+    f"Consolidados: "
+    f"{CONSOLIDADOS_DIR}"
+)
