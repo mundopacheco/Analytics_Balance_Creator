@@ -115,45 +115,85 @@ cd Analytics_Balance_Creator
 
 ### 2. Crear un entorno virtual
 
-```bash
-python -m venv EdosEnv
-```
-
-Activa el entorno según tu sistema.
-
-#### Windows PowerShell / CMD
-
-```powershell
-EdosEnv\Scripts\activate
-```
-
-#### Git Bash
+Para facilitar las cosas recomiendo utilizar **Anaconda** o **Miniconda**, así que primero deberas descargar e instalar alguna versión en tu computadora o si ya tienes experiencia con python puedes saltarte este paso y validar directamente si cuentas con las librerías necesarias para correr el script principal. De otro modo, puedes crear un entorno aislado para ejecutar el proyecto sin modificar tu instalación principal de Python desde una terminal de Anaconda:
 
 ```bash
-source EdosEnv/Scripts/activate
+conda create --name EdosEnv python=3.12
 ```
 
-#### macOS / Linux
+Cuando Conda solicite confirmación:
+
+```text
+Proceed ([y]/n)?
+```
+
+escribe:
+
+```text
+y
+```
+
+Activar el entorno:
 
 ```bash
-source EdosEnv/bin/activate
+conda activate EdosEnv
 ```
 
 ### 3. Instalar las dependencias
+
+Con el entorno activo, instala las dependencias necesarias:
 
 ```bash
 pip install pandas pymupdf numpy matplotlib
 ```
 
-### 4. Descargar los estados de cuenta
+Si también quieres trabajar con la documentación local del proyecto:
 
-Descarga desde BBVA los estados de cuenta de débito que quieras analizar y colócalos en:
+```bash
+pip install mkdocs
+```
+
+### 4. Verificar la instalación
+
+Puedes comprobar la versión de Python con:
+
+```bash
+python --version
+```
+
+Y verificar que las principales dependencias puedan importarse:
+
+```bash
+python -c "import pandas, fitz, numpy, matplotlib; print('Dependencias instaladas correctamente')"
+```
+
+#### Volver a utilizar el entorno
+
+Si por alguna razón cerraste la terminal de Anaconda y necesitas volver a ejecutar debes volver a activar el entorno, no es necesario crearlo nuevamente ni instalar las dependencias, solo usa:
+
+```bash
+conda activate EdosEnv
+```
+
+#### Documentación
+
+Si quieres ejecutar la documentación del repo local y verla en un navegador ejecuta:
+
+```bash
+mkdocs serve
+```
+
+Y visita la URL que aparece en tu terminal. O también puedes ver la documentación completa [aqui](docs/index.md).
+
+### 5. Descargar los estados de cuenta
+
+Descarga desde la app de BBVA los estados de cuenta de débito que quieras analizar y colócalos en la carpeta:
 
 ```text
 Estados de cuenta/
 ```
 
-Utiliza nombres que incluyan el mes y el año:
+Se recomienda usar la mayor cantidad de estados de cuenta disponibles para que mejore el análisis. Utiliza nombres que incluyan el mes y el año para cada archivo:
 
 ```text
 Enero 2025.pdf
@@ -161,24 +201,27 @@ Febrero 2025.pdf
 Marzo 2025.pdf
 ```
 
-### 5. Procesar los estados de cuenta
+### 6. Procesar los estados de cuenta
 
-Ejecuta:
+Con el entorno `EdosEnv` activo, y las librerías instaladas ya puedes ejecutar el script de extracción. Debes contar con los PDF's de los estados de cuenta en la carpeta correspondiente como se describe en el paso anterior. Recuerda que en tu terminal debes estar en la carpeta donde clonaste el repositorio y ejecutar:
 
 ```bash
 python procesar_estados.py
 ```
 
-Los datos generados se organizan bajo:
+Los archivos csv generados se organizan en la carpeta `csv_output`:
 
 ```text
 csv_output/
 ├── consolidados/
 ├── saldos/
 └── resumenes/
+Enero 2025.csv
+Febrero 2025.csv
+Marzo 2025.csv
 ```
 
-Antes de realizar el análisis, comprueba que los cargos, abonos y saldos extraídos coincidan con los valores reportados por BBVA.
+Antes de realizar el análisis, comprueba que los cargos, abonos y saldos extraídos coincidan con los valores reportados por BBVA. Durante la ejecución se hace una validación automática para cada insumo colocado, verás una leyenda que diga `VALIDACION OK: montos y conteos cuadran con el PDF.`, pero es recomendable validar algunos de manera manual o comparar los movimientos en el pdf del estado de cuenta con los movimeientos en el csv del mes correspondiente.
 
 ---
 
@@ -237,41 +280,6 @@ El manual incluye:
 - [Desarrollo de TDC](docs/tdc-development.md)
 
 ---
-
-## Documentación con MkDocs
-
-La documentación está construida con [MkDocs](https://www.mkdocs.org/).
-
-Instala MkDocs con:
-
-```bash
-pip install mkdocs
-```
-
-Para ejecutar la documentación localmente:
-
-```bash
-mkdocs serve
-```
-
-Después abre:
-
-```text
-http://127.0.0.1:8000/
-```
-
-Los archivos fuente de la documentación se encuentran en:
-
-```text
-docs/
-```
-
-y la navegación del manual se configura mediante:
-
-```text
-mkdocs.yml
-```
-
 ---
 
 ## Estructura general
@@ -313,11 +321,9 @@ Analytics_Balance_Creator/
 
 ---
 
-## Privacidad
+## Privacidad (Advertencia)
 
-Este proyecto procesa información financiera personal.
-
-No deben incluirse en el repositorio:
+Este proyecto procesa información financiera personal. No deben incluirse en el repositorio, pero puede colocarse de manera local en las carpetas generadas:
 
 ```text
 Estados de cuenta/
@@ -346,9 +352,7 @@ Las imágenes utilizadas como ejemplo en la documentación deben generarse utili
 
 ## Limitaciones
 
-El proyecto depende de la estructura de los estados de cuenta observados hasta el momento.
-
-Una nueva versión del PDF de BBVA puede requerir ajustes si cambian:
+El proyecto depende de la estructura de los estados de cuenta observados hasta el momento. Se utilizaron muestras de estados de cuenta que vand desde agosto de 2022 hasta agosto 2026. Una nueva versión del PDF de BBVA puede requerir ajustes si cambian:
 
 - los encabezados;
 - la posición de las columnas;
