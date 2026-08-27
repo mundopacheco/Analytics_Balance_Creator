@@ -77,7 +77,7 @@ Sin embargo, sabemos que los hábitos de consumo de nuestra epoca para la clase 
 
 ![Ejemplo de presupuesto mensual sugerido](docs/assets/erratic_balance_example.png)
 
-La gráfica NO da información granular ya que cada persona ahorra o gasta dependiendo de distintas situaciones que pueden ser extarnas como el tratamiento de una enfermedad o el apoyo económico que damos a un familiar.
+La gráfica NO da información granular ya que cada persona ahorra o gasta dependiendo de distintas situaciones que pueden ser extarnas como el tratamiento de una enfermedad o el apoyo económico que se da a un familiar.
 
 Se debe tener en mente que esta herramienta tiene la finalidad de brindar una mirada detallada al flujo de dinero para observar y decidir de manera conciente "cuándo" y "en qué" gastamos. Con el CSV de la información extraida se pueden crear hojas de cálculo u otros scripts más apegados a lo que queroms lograr. Un uso de gran utilidad, es el presupuesto generado, que debe interpretarse como un punto de partida basado en el comportamiento histórico y no como una recomendación financiera definitiva. Como recomendación el presupuesto obtenido se debe comparar de manera manual con lo que tenemos identificado de manera empírica, ya sea utilizando uno existente o generando uno "ideal" de acuerdo a lo que contemplamos mes con mes o quincena con quincena.
 
@@ -109,7 +109,7 @@ Los scripts relacionados con tarjeta de crédito (`TDC`) son experimentales y ac
 ### 1. Clonar el repositorio
 
 ```bash
-git clone <URL_DEL_REPOSITORIO>
+git clone git@github.com:mundopacheco/Analytics_Balance_Creator.git
 cd Analytics_Balance_Creator
 ```
 
