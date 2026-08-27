@@ -223,7 +223,205 @@ Marzo 2025.csv
 
 Antes de realizar el análisis, comprueba que los cargos, abonos y saldos extraídos coincidan con los valores reportados por BBVA. Durante la ejecución se hace una validación automática para cada insumo colocado, verás una leyenda que diga `VALIDACION OK: montos y conteos cuadran con el PDF.`, pero es recomendable validar algunos de manera manual o comparar los movimientos en el pdf del estado de cuenta con los movimeientos en el csv del mes correspondiente.
 
+Valida que se hayan generado tres archivos csv dentro de la carpeta  `consolidados`:
+
+```text
+csv_output/consolidados/
+movimientos_debito_total.csv
+resumenes_debito_total.csv
+saldos_debito_total.csv
+```
+Estos tres archivos serán necesarios para correr la libreta de de Jupyter `Análisis_Débito_Publicar.ipynb`.
+
 ---
+
+## Análisis
+
+La libreta de jupyter se puede utilizar para realizar el análisis de manera local sin utilizar Google Colab, sin embargo, fue diseñada desde Colab por lo cuál es más fácil subir la libreta y usarla desde ahí. Los archivos csv generados se subiran unicamente de manera temporal a la libreta y Google no los va a conservar cuando finalice la sesión del entorno de la libreta (que se cierra automaticamente después de cierto tiempo sin usar). Si prefieres hacerlo con Google, basta cargar el archivo de la libreta a tu Drive de Google y abrirlo utilizando Colab. Luego debes subir los archivos generados en la carpeta local `consolidados` a la carpeta dentro de la libreta llamada `Content` (esta se encuentra en la barra lateral izquierda).
+
+Ojo: no coloques la información dentro de `sample_data`, puedes arrastrar y soltar tus archivos CSV justo debajo de la carpeta `sample_data`. Después sólo debes ejecutar todas las celdas.
+
+Si prefieres no subir tu información a Google, puedes ejecutar la libreta de manera local:
+
+### 1. Abrir una terminal en el repositorio
+
+Entra a la carpeta donde clonaste el proyecto:
+
+```bash
+cd Analytics_Balance_Creator
+```
+
+### 2. Activar el entorno de Python
+
+Si utilizas Anaconda o Miniconda:
+
+```bash
+conda activate EdosEnv
+```
+
+Si utilizas un entorno creado con `venv` en Windows PowerShell o CMD:
+
+### 3. Instalar Jupyter
+
+Con el entorno activo, instala Jupyter Notebook:
+
+```bash
+pip install notebook
+```
+
+También puedes utilizar JupyterLab:
+
+```bash
+pip install jupyterlab
+```
+
+Las principales dependencias utilizadas por el análisis pueden instalarse con:
+
+```bash
+pip install pandas numpy matplotlib
+```
+
+### 4. Iniciar Jupyter
+
+Para utilizar Jupyter Notebook:
+
+```bash
+jupyter notebook
+```
+
+O, si prefieres JupyterLab:
+
+```bash
+jupyter lab
+```
+
+Se iniciará un servidor local y normalmente se abrirá automáticamente una dirección similar a:
+
+```text
+http://localhost:8888/
+```
+
+Si el navegador no se abre automáticamente, copia la URL mostrada en la terminal y ábrela manualmente.
+
+### 5. Abrir la libreta
+
+Desde el explorador de archivos de Jupyter, localiza la libreta incluida en el repositorio:
+
+```text
+Análisis_Débito_Publicar.ipynb
+```
+
+Haz clic sobre ella para abrirla.
+
+### 6. Seleccionar el entorno correcto
+
+Verifica que la libreta esté utilizando el entorno donde instalaste las dependencias. Si utilizas Conda y `EdosEnv` no aparece como kernel disponible, instala `ipykernel`:
+
+```bash
+conda activate EdosEnv
+pip install ipykernel
+```
+
+Registra el entorno como kernel de Jupyter:
+
+```bash
+python -m ipykernel install --user --name EdosEnv --display-name "Python (EdosEnv)"
+```
+
+Después selecciona:
+
+```text
+Python (EdosEnv)
+```
+
+como kernel de la libreta.
+
+### 7. Preparar los archivos de entrada
+
+En la sección anterior se describe el flujo para obtener los archivos a procesar. El procesamiento genera los archivos utilizados posteriormente por la libreta, incluyendo los consolidados de:
+
+```text
+csv_output/consolidados/
+movimientos_debito_total.csv
+resumenes_debito_total.csv
+saldos_debito_total.csv
+```
+
+> **Importante:** la libreta fue diseñada originalmente para funcionar también en Google Colab. Si alguna celda busca archivos específicamente dentro de `/content`, será necesario seleccionar los archivos manualmente o adaptar esa ruta para la ejecución local.
+
+### 8. Ejecutar la libreta
+
+Una vez cargados los archivos correctos, ejecuta las celdas en orden desde el inicio.
+
+En Jupyter puedes utilizar:
+
+```text
+Run
+→ Run All Cells
+```
+
+Esto es recomendable porque las diferentes etapas de la libreta dependen de variables y DataFrames creados en celdas anteriores.
+
+El flujo general del análisis es:
+
+```text
+Carga de consolidados
+        ↓
+Limpieza de datos
+        ↓
+Validación
+        ↓
+Evolución del saldo
+        ↓
+Flujo mensual
+        ↓
+Normalización de movimientos
+        ↓
+Clasificación
+        ↓
+Presupuesto mensual
+```
+
+### 9. Detener Jupyter
+
+Cuando termines, regresa a la terminal donde ejecutaste Jupyter y presiona:
+
+```text
+Ctrl + C
+```
+
+Confirma el cierre del servidor si Jupyter lo solicita.
+
+Después puedes desactivar el entorno:
+
+```bash
+conda deactivate
+```
+
+o, si utilizas `venv`:
+
+```bash
+deactivate
+```
+
+### Volver a ejecutar la libreta
+
+En sesiones posteriores no necesitas reinstalar Jupyter ni volver a crear el entorno.
+
+Solamente ejecuta:
+
+```bash
+conda activate EdosEnv
+jupyter notebook
+```
+
+o:
+
+```bash
+conda activate EdosEnv
+jupyter lab
+```
+
 
 ## Flujo general
 
@@ -251,6 +449,10 @@ Estados de cuenta PDF
         ┌────────┼────────┐
         ▼        ▼        ▼
       Saldo    Gastos   Ingresos
+
+                 │
+                 ▼
+           Visualización
                  │
                  ▼
           Clasificación
