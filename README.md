@@ -237,9 +237,15 @@ Estos tres archivos serán necesarios para correr la libreta de de Jupyter `Aná
 
 ## Análisis
 
-La libreta de jupyter se puede utilizar para realizar el análisis de manera local sin utilizar Google Colab, sin embargo, fue diseñada desde Colab por lo cuál es más fácil subir la libreta y usarla desde ahí. Los archivos csv generados se subiran unicamente de manera temporal a la libreta y Google no los va a conservar cuando finalice la sesión del entorno de la libreta (que se cierra automaticamente después de cierto tiempo sin usar). Si prefieres hacerlo con Google, basta cargar el archivo de la libreta a tu Drive de Google y abrirlo utilizando Colab. Luego debes subir los archivos generados en la carpeta local `consolidados` a la carpeta dentro de la libreta llamada `Content` (esta se encuentra en la barra lateral izquierda).
+La libreta de jupyter se puede utilizar para realizar el análisis de manera local sin utilizar Google Colab, sin embargo, fue diseñada desde Colab por lo cuál es más fácil subir la libreta y usarla desde ahí. Los archivos csv generados se subiran unicamente de manera temporal a la libreta y Google no los va a conservar después de que finalice la sesión del entorno de la libreta (que se cierra automaticamente después de cierto tiempo sin usar).
 
-Ojo: no coloques la información dentro de `sample_data`, puedes arrastrar y soltar tus archivos CSV justo debajo de la carpeta `sample_data`. Después sólo debes ejecutar todas las celdas.
+Si prefieres hacer el análisis con Google Colab, basta con cargar el archivo de la libreta a tu Drive de Google y abrirlo utilizando Colab. Luego debes subir los archivos csv generados en la carpeta local `consolidados` a la carpeta que se encuentra dentro de la libreta llamada `Content` (esta se encuentra en la barra lateral izquierda).
+
+**Ojo:** NO coloques la información dentro de `sample_data`, puedes arrastrar y soltar tus archivos CSV justo debajo de la carpeta `sample_data`, debe verse algo así:
+
+![Carga de archivos csv en Colab](docs/assets/colab_files.png)
+
+Después sólo debes ejecutar todas las celdas.
 
 Si prefieres no subir tu información a Google, puedes ejecutar la libreta de manera local:
 
@@ -554,7 +560,7 @@ Las imágenes utilizadas como ejemplo en la documentación deben generarse utili
 
 ## Limitaciones
 
-El proyecto depende de la estructura de los estados de cuenta observados hasta el momento. Se utilizaron muestras de estados de cuenta que vand desde agosto de 2022 hasta agosto 2026. Una nueva versión del PDF de BBVA puede requerir ajustes si cambian:
+El proyecto depende de la estructura de los estados de cuenta observados hasta el momento. Se utilizaron muestras de estados de cuenta que van desde agosto de 2022 hasta agosto 2026. Una nueva versión del PDF de BBVA puede requerir ajustes si cambian:
 
 - los encabezados;
 - la posición de las columnas;
@@ -563,6 +569,8 @@ El proyecto depende de la estructura de los estados de cuenta observados hasta e
 - la organización de las páginas.
 
 La clasificación automática de movimientos también utiliza reglas heurísticas y puede requerir revisión manual para operaciones que no puedan identificarse con suficiente confianza.
+
+La libreta de Análisis está diseñada principalmente para meses continuos de información y es recomendable no saltarse ningún mes pero la extracción por otro lado no depende de que existan todos los meses.
 
 ---
 
