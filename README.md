@@ -2,11 +2,13 @@
 
 Analytics Balance Creator es un proyecto en Python para **extraer, validar, consolidar y analizar información financiera** proveniente de estados de cuenta BBVA en formato PDF.
 
-Actualmente, el flujo estable del proyecto está enfocado en **estados de cuenta de débito BBVA**.
+Actualmente hay muchos modelos de IA que permiten hacer lo mismo de manera más simple, pero estos son costosos y conservan la información de sus usuarios. Esta alternativa es completamente gratuita y no hace falta subir información personal o sensible como lo son los estados de cuenta.
+
+Actualmente, el flujo estable del proyecto está enfocado en **estados de cuenta de débito BBVA**. Se está trabajando en una versión para tarjetas de crédito.
 
 El proyecto permite extraer movimientos, saldos y resúmenes de los estados de cuenta, validar los datos obtenidos contra los valores reportados por BBVA y consolidar múltiples periodos para construir un historial financiero.
 
-También se incluye una libreta compatible con **Google Colab y Jupyter Notebook** para analizar los datos, visualizar la evolución del saldo, clasificar movimientos y generar una primera propuesta automática de presupuesto mensual.
+También se incluye una libreta compatible con **Google Colab y Jupyter Notebook** para analizar los datos, visualizar la evolución del saldo, clasificar movimientos y generar una primera propuesta automática de presupuesto mensual. Más adelante se muestran un par de ejemplos con datos sintéticos que ayudan a dar una vista rápida los datos extraidos.
 
 ---
 
@@ -63,21 +65,23 @@ La libreta transforma los estados de cuenta consolidados en información que per
 
 Las siguientes imágenes fueron generadas utilizando **datos financieros completamente sintéticos**. No contienen movimientos bancarios ni información financiera personal real.
 
-### Evolución histórica del saldo
+### Datos simulados
 
-Los saldos extraídos directamente de los estados de cuenta permiten reconstruir la evolución histórica real de la cuenta.
+Los saldos extraídos directamente de los estados de cuenta permiten reconstruir la evolución histórica real de la cuenta. 
 
-![Ejemplo de evolución histórica del saldo](docs/assets/balance-example.png)
+En esta curva se observa un escenario ideal hipotético en el que una persona se administra de manera optima y responsable, guardando su dinero a lo largo del tiempo.
 
-### Presupuesto mensual sugerido
+![Ejemplo de evolución histórica del saldo](docs/assets/balance_example.png)
 
-Después de clasificar los movimientos, la libreta analiza la frecuencia y comportamiento histórico de cada categoría para construir una primera propuesta de presupuesto mensual.
+Sin embargo, sabemos que los hábitos de consumo de nuestra epoca para la clase trabajadora, no son controlados y eso suele generar deuda o por lo menos un saldo cercano a cero la mayor parte del tiempo. Esta curva puede darnos una idea general de nuestra relación con el dinero y nos permite ver los meses en los que gastamos más porque parece que tenemos más.
 
-![Ejemplo de presupuesto mensual sugerido](docs/assets/budget-example.png)
+![Ejemplo de presupuesto mensual sugerido](docs/assets/erratic_balance_example.png)
 
-El presupuesto generado debe interpretarse como un punto de partida basado en el comportamiento histórico y no como una recomendación financiera definitiva.
+La gráfica NO da información granular ya que cada persona ahorra o gasta dependiendo de distintas situaciones que pueden ser extarnas como el tratamiento de una enfermedad o el apoyo económico que damos a un familiar.
 
-Consulta la [documentación completa](docs/index.md) para conocer la metodología utilizada.
+Se debe tener en mente que esta herramienta tiene la finalidad de brindar una mirada detallada al flujo de dinero para observar y decidir de manera conciente "cuándo" y "en qué" gastamos. Con el CSV de la información extraida se pueden crear hojas de cálculo u otros scripts más apegados a lo que queroms lograr. Un uso de gran utilidad, es el presupuesto generado, que debe interpretarse como un punto de partida basado en el comportamiento histórico y no como una recomendación financiera definitiva. Como recomendación el presupuesto obtenido se debe comparar de manera manual con lo que tenemos identificado de manera empírica, ya sea utilizando uno existente o generando uno "ideal" de acuerdo a lo que contemplamos mes con mes o quincena con quincena.
+
+Para comenzar a utilizar la herramienta accede a la [documentación completa](docs/index.md) en la que se describe la metodología utilizada y los pasos a seguir para generar la curva y el presupuesto.
 
 ---
 
