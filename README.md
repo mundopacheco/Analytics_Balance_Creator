@@ -486,6 +486,7 @@ El manual incluye:
 - [Presupuesto mensual](docs/monthly-budget.md)
 - [Solución de problemas](docs/troubleshooting.md)
 - [Desarrollo de TDC](docs/tdc-development.md)
+- [Interpretation](interpretation.md)
 
 ---
 ---
