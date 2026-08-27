@@ -74,3 +74,4 @@ La documentación está organizada en las siguientes secciones:
 - [Monthly Budget](monthly-budget.md)
 - [Troubleshooting](troubleshooting.md)
 - [TDC Development](tdc-development.md)
+- [Interpretation](interpretation.md)
